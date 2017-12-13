@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Wake on LAN</string>
+    <string name="separator">:</string>
+    <string name="mac_address">MAC Address</string>
+    <string name="send">Send</string>
+    <string name="packet_sent">Packet sent!</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+</resources>
