@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity {
