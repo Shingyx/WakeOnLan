@@ -1,6 +1,7 @@
 package com.github.shingyx.wakeonlan;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -15,23 +16,33 @@ import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static String SAVED_MAC_ADDRESS = "SavedMacAddress";
+
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        EditText macAddress = findViewById(R.id.macAddress);
-        Button send = findViewById(R.id.send);
-        ProgressBar progress = findViewById(R.id.progress);
+        sharedPreferences = getSharedPreferences("WakeOnLanData", MODE_PRIVATE);
 
-        // TODO replace with previously used, save to shared preferences
-        macAddress.setText("00:00:00:00:00:00");
+        EditText macAddressField = findViewById(R.id.macAddress);
+        Button sendButton = findViewById(R.id.send);
+        ProgressBar progressBar = findViewById(R.id.progressBar);
 
-        send.setOnClickListener(v -> {
-            progress.setVisibility(View.VISIBLE);
+        macAddressField.setText(getSavedMacAddress());
 
-            new SendPacketTask(this, macAddress.getText().toString(), (String error) -> {
-                progress.setVisibility(View.INVISIBLE);
+        sendButton.setOnClickListener(v -> {
+            progressBar.setVisibility(View.VISIBLE);
+
+            String macAddress = macAddressField.getText().toString();
+            new SendPacketTask(this, macAddress, (String error) -> {
+                progressBar.setVisibility(View.INVISIBLE);
+
+                if (error == null) {
+                    setSavedMacAddress(macAddress);
+                }
 
                 new AlertDialog.Builder(this)
                         .setTitle(error == null ? R.string.packet_sent : R.string.error)
@@ -41,6 +52,16 @@ public class MainActivity extends AppCompatActivity {
                         .show();
             }).execute();
         });
+    }
+
+    private String getSavedMacAddress() {
+        return sharedPreferences.getString(SAVED_MAC_ADDRESS, null);
+    }
+
+    private void setSavedMacAddress(String macAddress) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(SAVED_MAC_ADDRESS, macAddress);
+        editor.apply();
     }
 
     private static class SendPacketTask extends AsyncTask<Void, Void, Void> {
