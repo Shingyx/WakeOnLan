@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             String error = null;
             try {
                 new MagicPacketSender().send(activity, macAddress);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 error = e.getMessage();
             }
             String finalError = error;

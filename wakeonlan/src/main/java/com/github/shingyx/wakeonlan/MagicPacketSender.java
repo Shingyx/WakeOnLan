@@ -11,6 +11,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.regex.Pattern;
 
 public class MagicPacketSender {
 
@@ -19,13 +20,24 @@ public class MagicPacketSender {
     private static final int MAC_ADDRESS_BYTE_LENGTH = 6;
     private static final int WOL_PORT = 9;
 
-    public void send(Context context, String macAddress) throws IOException {
+    public void send(Context context, String macAddress) throws Exception {
+        if (!isValidMacAddress(macAddress)) {
+            throw new IllegalArgumentException("Invalid MAC address");
+        }
         byte[] bytes = getMagicPacketBytes(macAddress);
         InetAddress ip = getBroadcastAddress(context);
         DatagramPacket packet = new DatagramPacket(bytes, bytes.length, ip, WOL_PORT);
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.send(packet);
         }
+    }
+
+    public boolean isValidMacAddress(String macAddress) throws IllegalArgumentException {
+        if (macAddress == null || macAddress.isEmpty()) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile("([0-9a-f]{2}[:-]){5}[0-9a-f]{2}", Pattern.CASE_INSENSITIVE);
+        return pattern.matcher(macAddress).matches();
     }
 
     private byte[] getMagicPacketBytes(String macAddress) {
@@ -46,7 +58,7 @@ public class MagicPacketSender {
     }
 
     private byte[] convertMacAddressString(String macAddress) {
-        String[] parts = macAddress.split(":");
+        String[] parts = macAddress.split("[:-]");
         byte[] bytes = new byte[MAC_ADDRESS_BYTE_LENGTH];
         for (int i = 0; i < MAC_ADDRESS_BYTE_LENGTH; i++) {
             int hex = Integer.parseInt(parts[i], 16);
