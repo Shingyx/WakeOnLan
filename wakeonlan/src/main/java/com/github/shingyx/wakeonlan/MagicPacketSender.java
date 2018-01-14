@@ -46,7 +46,7 @@ public class MagicPacketSender {
         if (macAddress == null) {
             return false;
         }
-        Pattern pattern = Pattern.compile("([0-9a-f]{2}[:-]){5}[0-9a-f]{2}", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$", Pattern.CASE_INSENSITIVE);
         return pattern.matcher(macAddress).matches();
     }
 

@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         sendButton.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
 
-            String macAddress = macAddressField.getText().toString();
+            String macAddress = macAddressField.getText().toString().trim();
             new SendPacketTask(this, macAddress, (String error) -> {
                 progressBar.setVisibility(View.INVISIBLE);
 
