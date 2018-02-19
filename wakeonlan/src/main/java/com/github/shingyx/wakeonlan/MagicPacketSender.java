@@ -42,7 +42,7 @@ public class MagicPacketSender {
         return bytes;
     }
 
-    private boolean isValidMacAddress(String macAddress) throws IllegalArgumentException {
+    private boolean isValidMacAddress(String macAddress) {
         if (macAddress == null) {
             return false;
         }
