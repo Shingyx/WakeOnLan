@@ -1,6 +1,7 @@
 package com.github.shingyx.wakeonlan;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
@@ -12,24 +13,24 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
-public class MagicPacketSender {
+public class MagicPacketProcessor {
 
     private static final int MAGIC_PACKET_LENGTH = 102;
     private static final int SYNC_STREAM_LENGTH = 6;
     private static final int MAC_ADDRESS_BYTE_LENGTH = 6;
     private static final int WOL_PORT = 9;
+    private static final String SHARED_PREFERENCES_NAME = "WakeOnLanData";
+    private static final String SAVED_MAC_ADDRESS = "SavedMacAddress";
 
-    public void send(Context context, String macAddress) throws Exception {
-        byte[] macAddressBytes = convertMacAddressString(macAddress);
-        byte[] packetBytes = getMagicPacketBytes(macAddressBytes);
-        InetAddress ip = getBroadcastAddress(context);
-        DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length, ip, WOL_PORT);
-        try (DatagramSocket socket = new DatagramSocket()) {
-            socket.send(packet);
-        }
+    private Context context;
+    private SharedPreferences sharedPreferences;
+
+    public MagicPacketProcessor(Context context) {
+        this.context = context;
+        this.sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
     }
 
-    public byte[] convertMacAddressString(String macAddress) {
+    public static byte[] convertMacAddressString(String macAddress) {
         if (!isValidMacAddress(macAddress)) {
             throw new IllegalArgumentException("Invalid MAC address");
         }
@@ -42,7 +43,7 @@ public class MagicPacketSender {
         return bytes;
     }
 
-    private boolean isValidMacAddress(String macAddress) {
+    private static boolean isValidMacAddress(String macAddress) {
         if (macAddress == null) {
             return false;
         }
@@ -50,7 +51,7 @@ public class MagicPacketSender {
         return pattern.matcher(macAddress).matches();
     }
 
-    private byte[] getMagicPacketBytes(byte[] macAddressBytes) {
+    private static byte[] getMagicPacketBytes(byte[] macAddressBytes) {
         byte[] packet = new byte[MAGIC_PACKET_LENGTH];
 
         // Synchronization Stream
@@ -66,7 +67,27 @@ public class MagicPacketSender {
         return packet;
     }
 
-    private InetAddress getBroadcastAddress(Context context) throws UnknownHostException {
+    public String getSavedMacAddress() {
+        return sharedPreferences.getString(SAVED_MAC_ADDRESS, null);
+    }
+
+    public void setSavedMacAddress(String macAddress) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(SAVED_MAC_ADDRESS, macAddress);
+        editor.apply();
+    }
+
+    public void send(String macAddress) throws Exception {
+        byte[] macAddressBytes = convertMacAddressString(macAddress);
+        byte[] packetBytes = getMagicPacketBytes(macAddressBytes);
+        InetAddress ip = getBroadcastAddress();
+        DatagramPacket packet = new DatagramPacket(packetBytes, packetBytes.length, ip, WOL_PORT);
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.send(packet);
+        }
+    }
+
+    private InetAddress getBroadcastAddress() throws UnknownHostException {
         WifiManager wifiManager = context.getSystemService(WifiManager.class);
         if (wifiManager != null) {
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();

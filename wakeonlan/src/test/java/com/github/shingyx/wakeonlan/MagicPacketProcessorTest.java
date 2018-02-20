@@ -1,18 +1,10 @@
 package com.github.shingyx.wakeonlan;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class MagicPacketSenderTest {
-
-    private MagicPacketSender instance;
-
-    @Before
-    public void setup() {
-        instance = new MagicPacketSender();
-    }
+public class MagicPacketProcessorTest {
 
     @Test
     public void convertMacAddressString_allZero() throws Exception {
@@ -80,7 +72,7 @@ public class MagicPacketSenderTest {
     }
 
     private void runHappyTest(byte[] expected, String input) {
-        assertArrayEquals(expected, instance.convertMacAddressString(input));
+        assertArrayEquals(expected, MagicPacketProcessor.convertMacAddressString(input));
     }
 
     private void runHappyTest(int[] expected, String input) {
@@ -93,7 +85,7 @@ public class MagicPacketSenderTest {
 
     private void runSadTest(String input) {
         try {
-            instance.convertMacAddressString(input);
+            MagicPacketProcessor.convertMacAddressString(input);
             fail("Expected an exception");
         } catch (IllegalArgumentException e) {
             // Caught an IllegalArgumentException

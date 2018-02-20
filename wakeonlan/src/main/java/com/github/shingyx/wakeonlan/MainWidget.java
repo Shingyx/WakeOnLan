@@ -5,12 +5,16 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 public class MainWidget extends AppWidgetProvider {
 
     private static final String SEND_PACKET = "SEND_PACKET";
+
+    private Handler handler;
+    private MagicPacketProcessor magicPacketProcessor;
 
     public static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
         // Construct the RemoteViews object
@@ -35,22 +39,27 @@ public class MainWidget extends AppWidgetProvider {
     }
 
     @Override
-    public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
-    }
-
-    @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
         if (SEND_PACKET.equals(intent.getAction())) {
-            // TODO
-            Toast.makeText(context, "HELLO WORLD", Toast.LENGTH_SHORT).show();
+            lazySetup(context);
+
+            new SendPacketTask(magicPacketProcessor, (String error) -> {
+                String message = error == null ?
+                        context.getString(R.string.packet_sent) :
+                        (context.getString(R.string.error) + ": " + error);
+                handler.post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
+            }).execute();
+        }
+    }
+
+    private void lazySetup(Context context) {
+        if (handler == null) {
+            handler = new Handler();
+        }
+        if (magicPacketProcessor == null) {
+            magicPacketProcessor = new MagicPacketProcessor(context);
         }
     }
 }
