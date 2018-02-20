@@ -25,7 +25,7 @@ public class SendPacketTask extends AsyncTask<Void, Void, Void> {
         } catch (Exception e) {
             error = e.getMessage();
         }
-        callback.function(error);
+        callback.onComplete(error);
         return null;
     }
 }
