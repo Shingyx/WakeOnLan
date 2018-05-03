@@ -84,10 +84,8 @@ private fun getMagicPacketBytes(macAddressBytes: ByteArray): ByteArray {
     }
 
     // Target MAC copied 16 times
-    var i = SYNC_STREAM_LENGTH
-    while (i < MAGIC_PACKET_LENGTH) {
+    for (i in SYNC_STREAM_LENGTH until MAGIC_PACKET_LENGTH step MAC_ADDRESS_BYTE_LENGTH) {
         System.arraycopy(macAddressBytes, 0, packet, i, MAC_ADDRESS_BYTE_LENGTH)
-        i += MAC_ADDRESS_BYTE_LENGTH
     }
 
     return packet
