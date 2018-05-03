@@ -1,6 +1,7 @@
 package com.github.shingyx.wakeonlan
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiManager
 import java.net.DatagramPacket
@@ -17,7 +18,7 @@ private const val SHARED_PREFERENCES_NAME = "WakeOnLanData"
 private const val SAVED_MAC_ADDRESS = "SavedMacAddress"
 
 class MagicPacketProcessor(private val context: Context) {
-    private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     fun getSavedMacAddress(): String {
         return sharedPreferences.getString(SAVED_MAC_ADDRESS, "")
