@@ -1,0 +1,93 @@
+package com.github.shingyx.wakeonlan
+
+import android.content.Context
+import android.net.wifi.SupplicantState
+import android.net.wifi.WifiManager
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
+import java.net.UnknownHostException
+import java.util.regex.Pattern
+
+private const val MAGIC_PACKET_LENGTH = 102
+private const val SYNC_STREAM_LENGTH = 6
+private const val MAC_ADDRESS_BYTE_LENGTH = 6
+private const val WOL_PORT = 9
+private const val SHARED_PREFERENCES_NAME = "WakeOnLanData"
+private const val SAVED_MAC_ADDRESS = "SavedMacAddress"
+
+class MagicPacketProcessor(private val context: Context) {
+    private val sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+    fun getSavedMacAddress(): String {
+        return sharedPreferences.getString(SAVED_MAC_ADDRESS, "")
+    }
+
+    fun saveMacAddress(macAddress: String) {
+        val editor = sharedPreferences.edit()
+        editor.putString(SAVED_MAC_ADDRESS, macAddress)
+        editor.apply()
+    }
+
+    fun send(macAddress: String) {
+        val macAddressBytes = convertMacAddressString(macAddress)
+        val packetBytes = getMagicPacketBytes(macAddressBytes)
+        val ip = getBroadcastAddress()
+        val packet = DatagramPacket(packetBytes, packetBytes.size, ip, WOL_PORT)
+        DatagramSocket().use { it.send(packet) }
+    }
+
+    private fun getBroadcastAddress(): InetAddress {
+        val wifiManager = context.getSystemService(WifiManager::class.java)
+        if (wifiManager != null) {
+            val wifiInfo = wifiManager.connectionInfo
+            val dhcpInfo = wifiManager.dhcpInfo
+
+            if (dhcpInfo != null && wifiInfo?.supplicantState == SupplicantState.COMPLETED) {
+                val broadcast = dhcpInfo.ipAddress and dhcpInfo.netmask or dhcpInfo.netmask.inv()
+                val quads = ByteArray(4)
+                for (i in 0 until 4) {
+                    quads[i] = (broadcast shr i * 8).toByte()
+                }
+                return InetAddress.getByAddress(quads)
+            }
+        }
+        throw UnknownHostException("Unable to retrieve broadcast address")
+    }
+}
+
+fun convertMacAddressString(macAddress: String): ByteArray {
+    if (!isValidMacAddress(macAddress)) {
+        throw IllegalArgumentException("Invalid MAC address")
+    }
+    val parts = macAddress.split("[:-]".toRegex())
+    val bytes = ByteArray(MAC_ADDRESS_BYTE_LENGTH)
+    for (i in 0 until MAC_ADDRESS_BYTE_LENGTH) {
+        val hex = Integer.parseInt(parts[i], 16)
+        bytes[i] = hex.toByte()
+    }
+    return bytes
+}
+
+private fun isValidMacAddress(macAddress: String): Boolean {
+    val pattern = Pattern.compile("^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$", Pattern.CASE_INSENSITIVE)
+    return pattern.matcher(macAddress).matches()
+}
+
+private fun getMagicPacketBytes(macAddressBytes: ByteArray): ByteArray {
+    val packet = ByteArray(MAGIC_PACKET_LENGTH)
+
+    // Synchronization Stream
+    for (i in 0 until SYNC_STREAM_LENGTH) {
+        packet[i] = 0xff.toByte()
+    }
+
+    // Target MAC copied 16 times
+    var i = SYNC_STREAM_LENGTH
+    while (i < MAGIC_PACKET_LENGTH) {
+        System.arraycopy(macAddressBytes, 0, packet, i, MAC_ADDRESS_BYTE_LENGTH)
+        i += MAC_ADDRESS_BYTE_LENGTH
+    }
+
+    return packet
+}

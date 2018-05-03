@@ -26,11 +26,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="6"
-                android:labelFor="@id/macAddress"
                 android:text="@string/mac_address" />
 
             <EditText
-                android:id="@+id/macAddress"
+                android:id="@+id/macAddressField"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -40,7 +39,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/send"
+            android:id="@+id/sendButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send" />
