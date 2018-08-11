@@ -62,12 +62,7 @@ fun convertMacAddressString(macAddress: String): ByteArray {
         throw IllegalArgumentException("Invalid MAC address")
     }
     val parts = macAddress.split("[:-]".toRegex())
-    val bytes = ByteArray(MAC_ADDRESS_BYTE_LENGTH)
-    for (i in 0 until MAC_ADDRESS_BYTE_LENGTH) {
-        val hex = Integer.parseInt(parts[i], 16)
-        bytes[i] = hex.toByte()
-    }
-    return bytes
+    return ByteArray(MAC_ADDRESS_BYTE_LENGTH) { parts[it].toInt(16).toByte() }
 }
 
 private fun isValidMacAddress(macAddress: String): Boolean {

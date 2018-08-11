@@ -38,14 +38,14 @@ class MainWidget : AppWidgetProvider() {
         if (intent.action == SEND_PACKET) {
             lazySetup(context)
 
-            SendPacketTask(magicPacketProcessor, { error ->
+            SendPacketTask(magicPacketProcessor) { error ->
                 val message = if (error == null) {
                     context.getString(R.string.packet_sent)
                 } else {
                     "${context.getString(R.string.error)}: $error"
                 }
                 handler.post { Toast.makeText(context, message, Toast.LENGTH_SHORT).show() }
-            }).execute()
+            }.execute()
         }
     }
 

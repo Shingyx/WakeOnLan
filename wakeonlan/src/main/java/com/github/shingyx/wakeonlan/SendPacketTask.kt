@@ -8,8 +8,10 @@ class SendPacketTask(
         private val callback: (error: String?) -> Unit
 ) : AsyncTask<Unit, Unit, Unit>() {
 
-    constructor(magicPacketProcessor: MagicPacketProcessor, callback: (error: String?) -> Unit) :
-            this(magicPacketProcessor, magicPacketProcessor.getSavedMacAddress(), callback)
+    constructor(
+            magicPacketProcessor: MagicPacketProcessor,
+            callback: (error: String?) -> Unit
+    ) : this(magicPacketProcessor, magicPacketProcessor.getSavedMacAddress(), callback)
 
     override fun doInBackground(vararg args: Unit) {
         val error = try {

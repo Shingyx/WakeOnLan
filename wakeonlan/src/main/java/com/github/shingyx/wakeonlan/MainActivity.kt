@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
             val macAddress = macAddressField.text.toString().trim()
 
-            SendPacketTask(magicPacketProcessor, macAddress, { error ->
+            SendPacketTask(magicPacketProcessor, macAddress) { error ->
                 if (error == null) {
                     magicPacketProcessor.saveMacAddress(macAddress)
                 }
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                             .create()
                             .show()
                 }
-            }).execute()
+            }.execute()
         }
     }
 }
