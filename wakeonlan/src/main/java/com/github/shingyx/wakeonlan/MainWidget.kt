@@ -7,10 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import android.widget.Toast
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 private const val SEND_PACKET = "SEND_PACKET"
 
 class MainWidget : AppWidgetProvider() {
+    private val scope = MainScope()
+
     private lateinit var magicPacketProcessor: MagicPacketProcessor
 
     override fun onUpdate(
@@ -41,14 +45,20 @@ class MainWidget : AppWidgetProvider() {
         if (intent.action == SEND_PACKET) {
             lazySetup(context)
 
-            SendPacketTask(magicPacketProcessor) { error ->
+            scope.launch {
+                val macAddress = magicPacketProcessor.getSavedMacAddress()
+                val result = Result.runCatching {
+                    magicPacketProcessor.send(macAddress)
+                }
+                val error = result.exceptionOrNull()?.message
+
                 val message = if (error == null) {
                     context.getString(R.string.packet_sent)
                 } else {
                     "${context.getString(R.string.error)}: $error"
                 }
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            }.execute()
+            }
         }
     }
 

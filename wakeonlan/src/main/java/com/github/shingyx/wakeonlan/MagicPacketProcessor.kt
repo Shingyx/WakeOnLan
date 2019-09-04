@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -30,12 +32,14 @@ class MagicPacketProcessor(private val context: Context) {
         editor.apply()
     }
 
-    fun send(macAddress: String) {
-        val macAddressBytes = convertMacAddressString(macAddress)
-        val packetBytes = getMagicPacketBytes(macAddressBytes)
-        val ip = getBroadcastAddress()
-        val packet = DatagramPacket(packetBytes, packetBytes.size, ip, WOL_PORT)
-        DatagramSocket().use { it.send(packet) }
+    suspend fun send(macAddress: String) {
+        withContext(Dispatchers.IO) {
+            val macAddressBytes = convertMacAddressString(macAddress)
+            val packetBytes = getMagicPacketBytes(macAddressBytes)
+            val ip = getBroadcastAddress()
+            val packet = DatagramPacket(packetBytes, packetBytes.size, ip, WOL_PORT)
+            DatagramSocket().use { it.send(packet) }
+        }
     }
 
     private fun getBroadcastAddress(): InetAddress {
