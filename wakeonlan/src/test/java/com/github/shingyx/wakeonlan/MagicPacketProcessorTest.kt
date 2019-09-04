@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class MagicPacketProcessorTest {
-
     @Nested
     inner class ConvertMacAddressString {
-
         @Test
         fun allZero() {
             runHappyTest(intArrayOf(0, 0, 0, 0, 0, 0), "00:00:00:00:00:00")
@@ -76,7 +74,7 @@ class MagicPacketProcessorTest {
         }
 
         private fun runSadTest(input: String) {
-            assertThrows(IllegalArgumentException::class.java, { convertMacAddressString(input) })
+            assertThrows(IllegalArgumentException::class.java) { convertMacAddressString(input) }
         }
     }
 }

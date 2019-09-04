@@ -26,16 +26,14 @@ class MainActivity : AppCompatActivity() {
                 if (error == null) {
                     magicPacketProcessor.saveMacAddress(macAddress)
                 }
-                this.runOnUiThread {
-                    progressBar.visibility = View.INVISIBLE
+                progressBar.visibility = View.INVISIBLE
 
-                    AlertDialog.Builder(this)
-                            .setTitle(if (error == null) R.string.packet_sent else R.string.error)
-                            .setMessage(error)
-                            .setPositiveButton(R.string.ok, null)
-                            .create()
-                            .show()
-                }
+                AlertDialog.Builder(this)
+                    .setTitle(if (error == null) R.string.packet_sent else R.string.error)
+                    .setMessage(error)
+                    .setPositiveButton(R.string.ok, null)
+                    .create()
+                    .show()
             }.execute()
         }
     }

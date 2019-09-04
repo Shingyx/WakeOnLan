@@ -8,7 +8,6 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.UnknownHostException
-import java.util.regex.Pattern
 
 private const val MAGIC_PACKET_LENGTH = 102
 private const val SYNC_STREAM_LENGTH = 6
@@ -18,10 +17,11 @@ private const val SHARED_PREFERENCES_NAME = "WakeOnLanData"
 private const val SAVED_MAC_ADDRESS = "SavedMacAddress"
 
 class MagicPacketProcessor(private val context: Context) {
-    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private val sharedPreferences: SharedPreferences =
+        context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
     fun getSavedMacAddress(): String {
-        return sharedPreferences.getString(SAVED_MAC_ADDRESS, "")
+        return sharedPreferences.getString(SAVED_MAC_ADDRESS, "")!!
     }
 
     fun saveMacAddress(macAddress: String) {
@@ -46,10 +46,7 @@ class MagicPacketProcessor(private val context: Context) {
 
             if (dhcpInfo != null && wifiInfo?.supplicantState == SupplicantState.COMPLETED) {
                 val broadcast = dhcpInfo.ipAddress and dhcpInfo.netmask or dhcpInfo.netmask.inv()
-                val quads = ByteArray(4)
-                for (i in 0 until 4) {
-                    quads[i] = (broadcast shr i * 8).toByte()
-                }
+                val quads = ByteArray(4) { (broadcast shr it * 8).toByte() }
                 return InetAddress.getByAddress(quads)
             }
         }
@@ -58,16 +55,15 @@ class MagicPacketProcessor(private val context: Context) {
 }
 
 fun convertMacAddressString(macAddress: String): ByteArray {
-    if (!isValidMacAddress(macAddress)) {
-        throw IllegalArgumentException("Invalid MAC address")
-    }
+    require(isValidMacAddress(macAddress)) { "Invalid MAC address" }
+
     val parts = macAddress.split("[:-]".toRegex())
     return ByteArray(MAC_ADDRESS_BYTE_LENGTH) { parts[it].toInt(16).toByte() }
 }
 
 private fun isValidMacAddress(macAddress: String): Boolean {
-    val pattern = Pattern.compile("^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$", Pattern.CASE_INSENSITIVE)
-    return pattern.matcher(macAddress).matches()
+    val regex = Regex("^([0-9a-f]{2}[:-]){5}[0-9a-f]{2}$", RegexOption.IGNORE_CASE)
+    return regex.matches(macAddress)
 }
 
 private fun getMagicPacketBytes(macAddressBytes: ByteArray): ByteArray {
