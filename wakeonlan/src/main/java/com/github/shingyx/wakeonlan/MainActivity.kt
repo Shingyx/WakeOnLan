@@ -1,9 +1,9 @@
 package com.github.shingyx.wakeonlan
 
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -24,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         sendButton.setOnClickListener {
             scope.launch {
                 progressBar.visibility = View.VISIBLE
+                sendButton.isEnabled = false
 
                 val macAddress = macAddressField.text.toString().trim()
                 val result = Result.runCatching {
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
                 val error = result.exceptionOrNull()?.message
 
                 progressBar.visibility = View.INVISIBLE
+                sendButton.isEnabled = true
 
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle(if (error == null) R.string.packet_sent else R.string.error)
