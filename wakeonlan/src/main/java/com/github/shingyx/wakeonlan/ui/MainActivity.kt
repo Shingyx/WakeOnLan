@@ -26,41 +26,9 @@ class MainActivity : AppCompatActivity() {
 
         model = MainViewModel(application)
 
-        model.host.observe(this, Observer { host ->
-            hostname.text = host?.hostname ?: "-"
-            ip_address.text = host?.ipAddress ?: "-"
-            mac_address.text = host?.macAddress ?: "-"
-        })
-
-        model.hostScanResult.observe(this, Observer { result ->
-            result.onSuccess { hosts ->
-                MaterialAlertDialogBuilder(this@MainActivity)
-                    .setTitle(R.string.select_pc)
-                    .setAdapter(HostListAdapter(hosts)) { _, index ->
-                        model.selectHost(hosts[index])
-                    }
-                    .show()
-            }
-            result.onFailure { exception ->
-                MaterialAlertDialogBuilder(this@MainActivity)
-                    .setTitle(R.string.error)
-                    .setMessage(exception.message)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show()
-            }
-            setUiEnabled(true)
-        })
-
-        model.turnOnResult.observe(this, Observer { result ->
-            val error = result.exceptionOrNull()?.message
-            MaterialAlertDialogBuilder(this@MainActivity)
-                .setTitle(if (error == null) R.string.pc_turned_on else R.string.error)
-                .setMessage(error)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
-
-            setUiEnabled(true)
-        })
+        model.host.observe(this, Observer(this::populateHostUi))
+        model.hostScanResult.observe(this, Observer(this::handleHostScanResults))
+        model.turnOnResult.observe(this, Observer(this::handleTurnOnResult))
 
         select_pc.setOnClickListener {
             setUiEnabled(false)
@@ -76,6 +44,43 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         scope.cancel()
         super.onDestroy()
+    }
+
+    private fun populateHostUi(host: Host?) {
+        hostname.text = host?.hostname ?: "-"
+        ip_address.text = host?.ipAddress ?: "-"
+        mac_address.text = host?.macAddress ?: "-"
+    }
+
+    private fun handleHostScanResults(result: Result<List<Host>>) {
+        result.onSuccess { hosts ->
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(R.string.select_pc)
+                .setAdapter(HostListAdapter(hosts)) { _, index ->
+                    model.selectHost(hosts[index])
+                }
+                .show()
+        }
+        result.onFailure { exception ->
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(R.string.error)
+                .setMessage(exception.message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+        }
+
+        setUiEnabled(true)
+    }
+
+    private fun handleTurnOnResult(result: Result<Unit>) {
+        val error = result.exceptionOrNull()?.message
+        MaterialAlertDialogBuilder(this@MainActivity)
+            .setTitle(if (error == null) R.string.pc_turned_on else R.string.error)
+            .setMessage(error)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+
+        setUiEnabled(true)
     }
 
     private fun setUiEnabled(enable: Boolean) {

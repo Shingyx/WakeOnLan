@@ -8,8 +8,8 @@ import android.content.Intent
 import android.widget.RemoteViews
 import android.widget.Toast
 import com.github.shingyx.wakeonlan.R
-import com.github.shingyx.wakeonlan.data.MagicPacketProcessor
 import com.github.shingyx.wakeonlan.data.Storage
+import com.github.shingyx.wakeonlan.data.NetworkHandler
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,7 @@ class MainWidget : AppWidgetProvider() {
                 val result = Result.runCatching {
                     val host = Storage.getInstance(context).savedHost
                         ?: throw Exception(context.getString(R.string.error_null_host))
-                    MagicPacketProcessor(context).send(host)
+                    NetworkHandler(context).sendMagicPacket(host)
                 }
                 val error = result.exceptionOrNull()?.message
 

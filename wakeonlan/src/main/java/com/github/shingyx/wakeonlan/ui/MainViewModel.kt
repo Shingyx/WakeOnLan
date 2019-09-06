@@ -6,12 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
-import com.github.shingyx.wakeonlan.data.MagicPacketProcessor
 import com.github.shingyx.wakeonlan.data.Storage
+import com.github.shingyx.wakeonlan.data.NetworkHandler
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val storage = Storage.getInstance(application)
-    private val magicPacketProcessor = MagicPacketProcessor(application)
+    private val networkHandler = NetworkHandler(application)
 
     private val _host = MutableLiveData<Host?>()
     val host: LiveData<Host?> = _host
@@ -30,14 +30,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val result = Result.runCatching {
             val host = storage.savedHost
                 ?: throw Exception(getApplication<Application>().getString(R.string.error_null_host))
-            magicPacketProcessor.send(host)
+            networkHandler.sendMagicPacket(host)
         }
         _turnOnResult.value = result
     }
 
     suspend fun scanForHosts() {
         val result = Result.runCatching {
-            magicPacketProcessor.scanForHosts()
+            networkHandler.scanForHosts()
         }
         _hostScanResult.value = result
     }

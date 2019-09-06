@@ -28,8 +28,8 @@ private val arpTableIpMacRegex = Regex(
     setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)
 )
 
-class MagicPacketProcessor(private val context: Context) {
-    suspend fun send(host: Host) {
+class NetworkHandler(private val context: Context) {
+    suspend fun sendMagicPacket(host: Host) {
         withContext(Dispatchers.IO) {
             val macAddressBytes = convertMacAddressString(host.macAddress)
             val packetBytes = getMagicPacketBytes(macAddressBytes)
@@ -86,7 +86,7 @@ class MagicPacketProcessor(private val context: Context) {
 fun convertMacAddressString(macAddress: String): ByteArray {
     require(macRegex.matches(macAddress)) { "Invalid MAC address" }
 
-    val parts = macAddress.split(Regex("[:-]"))
+    val parts = macAddress.split(":")
     return ByteArray(MAC_ADDRESS_BYTE_LENGTH) { parts[it].toInt(16).toByte() }
 }
 
