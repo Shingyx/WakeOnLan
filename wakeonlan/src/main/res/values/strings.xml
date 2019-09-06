@@ -1,10 +1,8 @@
 <resources>
     <string name="app_name">Wake on LAN</string>
-    <string name="separator">:</string>
     <string name="mac_address">MAC Address</string>
     <string name="example_mac_address">e.g. 00:00:00:00:00:00</string>
-    <string name="send">Send</string>
-    <string name="packet_sent">Packet sent!</string>
+    <string name="turn_on">Turn on</string>
+    <string name="computer_turned_on">Your computer has been turned on!</string>
     <string name="error">Error</string>
-    <string name="ok">OK</string>
 </resources>

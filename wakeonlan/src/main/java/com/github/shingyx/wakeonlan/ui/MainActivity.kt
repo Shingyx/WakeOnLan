@@ -1,9 +1,11 @@
-package com.github.shingyx.wakeonlan
+package com.github.shingyx.wakeonlan.ui
 
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.github.shingyx.wakeonlan.R
+import com.github.shingyx.wakeonlan.data.MagicPacketProcessor
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -19,7 +21,15 @@ class MainActivity : AppCompatActivity() {
 
         magicPacketProcessor = MagicPacketProcessor(this)
 
-        macAddressField.setText(magicPacketProcessor.getSavedMacAddress())
+        macAddressField.setText(magicPacketProcessor.savedMacAddress)
+
+        scanButton.setOnClickListener {
+            scope.launch {
+                val hosts = magicPacketProcessor.scanForHosts()
+                // TODO do something
+                println(hosts.toString())
+            }
+        }
 
         sendButton.setOnClickListener {
             scope.launch {
@@ -29,19 +39,19 @@ class MainActivity : AppCompatActivity() {
                 val macAddress = macAddressField.text.toString().trim()
                 val result = Result.runCatching {
                     magicPacketProcessor.send(macAddress)
-                    magicPacketProcessor.saveMacAddress(macAddress)
+                    magicPacketProcessor.savedMacAddress = macAddress
                 }
                 val error = result.exceptionOrNull()?.message
 
-                progressBar.visibility = View.INVISIBLE
-                sendButton.isEnabled = true
-
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle(if (error == null) R.string.packet_sent else R.string.error)
+                    .setTitle(if (error == null) R.string.computer_turned_on else R.string.error)
                     .setMessage(error)
-                    .setPositiveButton(R.string.ok, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .create()
                     .show()
+
+                progressBar.visibility = View.INVISIBLE
+                sendButton.isEnabled = true
             }
         }
     }

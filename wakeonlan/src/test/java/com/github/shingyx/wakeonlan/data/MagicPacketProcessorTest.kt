@@ -1,4 +1,4 @@
-package com.github.shingyx.wakeonlan
+package com.github.shingyx.wakeonlan.data
 
 import org.junit.jupiter.api.Assertions.assertArrayEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -29,11 +29,6 @@ class MagicPacketProcessorTest {
         }
 
         @Test
-        fun hyphenSeparator() {
-            runHappyTest(intArrayOf(0, 0, 0, 0, 0, 0), "00-00-00-00-00-00")
-        }
-
-        @Test
         fun containsInvalidHex() {
             runSadTest("00:00:00:00:00:0g")
         }
@@ -50,7 +45,7 @@ class MagicPacketProcessorTest {
 
         @Test
         fun tooLong2() {
-            runSadTest("ff:ff:ff:ff:ff:ff-")
+            runSadTest("ff:ff:ff:ff:ff:ff:")
         }
 
         @Test
@@ -74,7 +69,9 @@ class MagicPacketProcessorTest {
         }
 
         private fun runSadTest(input: String) {
-            assertThrows(IllegalArgumentException::class.java) { convertMacAddressString(input) }
+            assertThrows(IllegalArgumentException::class.java) {
+                convertMacAddressString(input)
+            }
         }
     }
 }

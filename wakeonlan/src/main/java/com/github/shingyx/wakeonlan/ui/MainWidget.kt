@@ -1,4 +1,4 @@
-package com.github.shingyx.wakeonlan
+package com.github.shingyx.wakeonlan.ui
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -7,6 +7,8 @@ import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
 import android.widget.Toast
+import com.github.shingyx.wakeonlan.R
+import com.github.shingyx.wakeonlan.data.MagicPacketProcessor
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -22,19 +24,15 @@ class MainWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        // There may be multiple widgets active, so update all of them
         for (appWidgetId in appWidgetIds) {
-            // Construct the RemoteViews object
             val views = RemoteViews(context.packageName, R.layout.main_widget)
 
-            // Add the click listener
-            val intent = Intent(context, this.javaClass)
-            intent.action = SEND_PACKET
-            val pendingIntent =
+            val intent = Intent(SEND_PACKET, null, context, this.javaClass)
+            views.setOnClickPendingIntent(
+                R.id.widgetLayout,
                 PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-            views.setOnClickPendingIntent(R.id.widgetLayout, pendingIntent)
+            )
 
-            // Instruct the widget manager to update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
@@ -46,14 +44,13 @@ class MainWidget : AppWidgetProvider() {
             lazySetup(context)
 
             scope.launch {
-                val macAddress = magicPacketProcessor.getSavedMacAddress()
                 val result = Result.runCatching {
-                    magicPacketProcessor.send(macAddress)
+                    magicPacketProcessor.send()
                 }
                 val error = result.exceptionOrNull()?.message
 
                 val message = if (error == null) {
-                    context.getString(R.string.packet_sent)
+                    context.getString(R.string.computer_turned_on)
                 } else {
                     "${context.getString(R.string.error)}: $error"
                 }
