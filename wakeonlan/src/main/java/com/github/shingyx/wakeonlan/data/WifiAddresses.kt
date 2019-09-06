@@ -11,11 +11,18 @@ import java.net.NetworkInterface
 import java.net.UnknownHostException
 
 class WifiAddresses(context: Context) {
+    val ssid: String
     private val deviceIpAddress: Int
     private val interfaceAddress: InterfaceAddress
 
     init {
         val wifiInfo = getWifiInfo(context)
+
+        var ssid = wifiInfo.ssid
+        if (ssid.startsWith('"') && ssid.endsWith('"')) {
+            ssid = ssid.substring(1, ssid.length - 1)
+        }
+        this.ssid = ssid
 
         deviceIpAddress = wifiInfo.ipAddress
         val deviceInetAddress = inetAddressFromInt(deviceIpAddress)

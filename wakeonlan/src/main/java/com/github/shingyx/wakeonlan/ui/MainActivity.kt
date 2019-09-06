@@ -1,11 +1,15 @@
 package com.github.shingyx.wakeonlan.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
@@ -31,13 +35,17 @@ class MainActivity : AppCompatActivity() {
         model.turnOnResult.observe(this, Observer(this::handleTurnOnResult))
 
         select_pc.setOnClickListener {
-            setUiEnabled(false)
-            scope.launch { model.scanForHosts() }
+            if (checkPermissions()) {
+                setUiEnabled(false)
+                scope.launch { model.scanForHosts() }
+            }
         }
 
         turn_on.setOnClickListener {
-            setUiEnabled(false)
-            scope.launch { model.turnOn() }
+            if (checkPermissions()) {
+                setUiEnabled(false)
+                scope.launch { model.turnOn() }
+            }
         }
     }
 
@@ -50,6 +58,29 @@ class MainActivity : AppCompatActivity() {
         hostname.text = host?.hostname ?: "-"
         ip_address.text = host?.ipAddress ?: "-"
         mac_address.text = host?.macAddress ?: "-"
+        ssid.text = host?.ssid ?: "-"
+    }
+
+    private fun checkPermissions(): Boolean {
+        val permission = Manifest.permission.ACCESS_COARSE_LOCATION
+        val checkResult = ContextCompat.checkSelfPermission(this, permission)
+        if (checkResult == PackageManager.PERMISSION_GRANTED) {
+            return true
+        }
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(R.string.location_permission_title)
+                .setMessage(R.string.location_permission_rationale)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+                }
+                .setCancelable(false)
+                .show()
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+        }
+        return false
     }
 
     private fun handleHostScanResults(result: Result<List<Host>>) {

@@ -3,12 +3,16 @@
     <string name="hostname">Hostname</string>
     <string name="ip_address">IP Address</string>
     <string name="mac_address">MAC Address</string>
+    <string name="ssid">WiFi SSID</string>
     <string name="example_mac_address">e.g. 00:00:00:00:00:00</string>
     <string name="select_pc">Select PC</string>
     <string name="turn_on">Turn on</string>
     <string name="pc_turned_on">Your PC has been turned on!</string>
+    <string name="location_permission_title">Grant location permissions?</string>
+    <string name="location_permission_rationale">Wake on LAN requires location permissions to access the SSID of your WiFi network. This is used to make sure your device is on the correct network before trying to turn your PC on.</string>
     <string name="error">Error</string>
-    <string name="error_null_host">PC has not been selected yet</string>
-    <string name="error_cannot_read_wifi_info">Unable to read WiFi info</string>
-    <string name="error_cannot_read_arp_table">Failed to read arp table</string>
+    <string name="error_null_host">PC has not been selected yet.</string>
+    <string name="error_cannot_read_wifi_info">Unable to read WiFi info. Is WiFi turned on?</string>
+    <string name="error_cannot_read_arp_table">Failed to read arp table.</string>
+    <string name="error_incorrect_ssid">Device is connected to a different WiFi network.</string>
 </resources>

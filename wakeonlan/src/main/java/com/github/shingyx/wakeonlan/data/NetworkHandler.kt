@@ -33,14 +33,20 @@ class NetworkHandler(private val context: Context) {
         withContext(Dispatchers.IO) {
             val macAddressBytes = convertMacAddressString(host.macAddress)
             val packetBytes = getMagicPacketBytes(macAddressBytes)
-            val broadcastAddress = WifiAddresses(context).getBroadcastAddress()
+            val wifiAddresses = WifiAddresses(context)
+            if (wifiAddresses.ssid != host.ssid) {
+                throw IOException(context.getString(R.string.error_incorrect_ssid))
+            }
+            val broadcastAddress = wifiAddresses.getBroadcastAddress()
             val packet = DatagramPacket(packetBytes, packetBytes.size, broadcastAddress, WOL_PORT)
             DatagramSocket().use { it.send(packet) }
         }
     }
 
     suspend fun scanForHosts(): List<Host> {
-        val inetAddressMap = scanForReachableAddresses().associateBy { it.hostAddress }
+        val wifiAddresses = WifiAddresses(context)
+        val ssid = wifiAddresses.ssid
+        val inetAddressMap = scanForReachableAddresses(wifiAddresses).associateBy { it.hostAddress }
 
         if (!coroutineContext.isActive) {
             return emptyList()
@@ -58,16 +64,16 @@ class NetworkHandler(private val context: Context) {
             val (_, ipAddress, macAddress) = match.groupValues
             val inetAddress = inetAddressMap[ipAddress]
             if (inetAddress != null) {
-                hosts.add(Host(inetAddress.hostName, inetAddress.hostAddress, macAddress))
+                hosts.add(Host(inetAddress.hostName, inetAddress.hostAddress, macAddress, ssid))
             }
         }
 
         return hosts
     }
 
-    private suspend fun scanForReachableAddresses(): List<InetAddress> {
+    private suspend fun scanForReachableAddresses(wifiAddresses: WifiAddresses): List<InetAddress> {
         val reachableAddresses = ConcurrentLinkedQueue<InetAddress>()
-        val allPotentialHosts = WifiAddresses(context).getAllPotentialHosts()
+        val allPotentialHosts = wifiAddresses.getAllPotentialHosts()
 
         withContext(Dispatchers.IO) {
             allPotentialHosts.map {
