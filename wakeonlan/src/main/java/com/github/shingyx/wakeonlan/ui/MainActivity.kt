@@ -1,6 +1,7 @@
 package com.github.shingyx.wakeonlan.ui
 
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-            MaterialAlertDialogBuilder(this@MainActivity)
+            MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.location_permission_title)
                 .setMessage(R.string.location_permission_rationale)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -85,15 +86,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleHostScanResults(result: Result<List<Host>>) {
         result.onSuccess { hosts ->
-            MaterialAlertDialogBuilder(this@MainActivity)
+            MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.select_pc)
-                .setAdapter(HostListAdapter(hosts)) { _, index ->
+                .setAdapter(HostListAdapter(this, hosts)) { _, index ->
                     model.selectHost(hosts[index])
                 }
                 .show()
         }
         result.onFailure { exception ->
-            MaterialAlertDialogBuilder(this@MainActivity)
+            MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.error)
                 .setMessage(exception.message)
                 .setPositiveButton(android.R.string.ok, null)
@@ -105,7 +106,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleTurnOnResult(result: Result<Unit>) {
         val error = result.exceptionOrNull()?.message
-        MaterialAlertDialogBuilder(this@MainActivity)
+        MaterialAlertDialogBuilder(this)
             .setTitle(if (error == null) R.string.pc_turned_on else R.string.error)
             .setMessage(error)
             .setPositiveButton(android.R.string.ok, null)
@@ -119,31 +120,32 @@ class MainActivity : AppCompatActivity() {
         turn_on.isEnabled = enable
         progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
     }
+}
 
-    private inner class HostListAdapter(
-        private val hosts: List<Host>
-    ) : BaseAdapter() {
-        override fun getItem(position: Int): Host {
-            return hosts[position]
-        }
+private class HostListAdapter(
+    private val activity: Activity,
+    private val hosts: List<Host>
+) : BaseAdapter() {
+    override fun getItem(position: Int): Host {
+        return hosts[position]
+    }
 
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
 
-        override fun getCount(): Int {
-            return hosts.size
-        }
+    override fun getCount(): Int {
+        return hosts.size
+    }
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val host = hosts[position]
-            val view = convertView
-                ?: layoutInflater.inflate(R.layout.list_item_host, parent, false)
-            return view.apply {
-                findViewById<TextView>(R.id.hostname).text = host.hostname
-                findViewById<TextView>(R.id.ip_address).text = host.ipAddress
-                findViewById<TextView>(R.id.mac_address).text = host.macAddress
-            }
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val host = hosts[position]
+        val view = convertView
+            ?: activity.layoutInflater.inflate(R.layout.list_item_host, parent, false)
+        return view.apply {
+            findViewById<TextView>(R.id.hostname).text = host.hostname
+            findViewById<TextView>(R.id.ip_address).text = host.ipAddress
+            findViewById<TextView>(R.id.mac_address).text = host.macAddress
         }
     }
 }
