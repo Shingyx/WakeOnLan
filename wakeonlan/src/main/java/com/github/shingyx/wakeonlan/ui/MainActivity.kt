@@ -7,7 +7,6 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        model = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        model = MainViewModel(application)
 
         model.host.observe(this, Observer { host ->
             hostname.text = host?.hostname ?: "-"
@@ -61,8 +60,6 @@ class MainActivity : AppCompatActivity() {
             setUiEnabled(false)
             scope.launch { model.turnOn() }
         }
-
-        model.initialize()
     }
 
     override fun onDestroy() {

@@ -22,7 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _hostScanResult = MutableLiveData<List<Host>>()
     val hostScanResult: LiveData<List<Host>> = _hostScanResult
 
-    fun initialize() {
+    init {
         _host.value = storage.savedHost
     }
 
