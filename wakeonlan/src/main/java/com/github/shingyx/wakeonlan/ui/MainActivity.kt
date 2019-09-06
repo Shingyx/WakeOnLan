@@ -32,11 +32,22 @@ class MainActivity : AppCompatActivity() {
             mac_address.text = host?.macAddress ?: "-"
         })
 
-        model.hostScanResult.observe(this, Observer { hosts ->
-            MaterialAlertDialogBuilder(this@MainActivity)
-                .setTitle(R.string.select_pc)
-                .setAdapter(HostListAdapter(hosts)) { _, index -> model.selectHost(hosts[index]) }
-                .show()
+        model.hostScanResult.observe(this, Observer { result ->
+            result.onSuccess { hosts ->
+                MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle(R.string.select_pc)
+                    .setAdapter(HostListAdapter(hosts)) { _, index ->
+                        model.selectHost(hosts[index])
+                    }
+                    .show()
+            }
+            result.onFailure { exception ->
+                MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle(R.string.error)
+                    .setMessage(exception.message)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show()
+            }
             setUiEnabled(true)
         })
 
