@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.wifi.SupplicantState
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import com.github.shingyx.wakeonlan.R
 import java.net.InetAddress
 import java.net.InterfaceAddress
 import java.net.NetworkInterface
@@ -21,7 +22,7 @@ class WifiAddresses(context: Context) {
         interfaceAddress = NetworkInterface.getByInetAddress(deviceInetAddress)
             ?.interfaceAddresses
             ?.find { it.address == deviceInetAddress }
-            ?: throw UnknownHostException("Unable to get WiFi interface")
+            ?: throw UnknownHostException(context.getString(R.string.error_cannot_read_wifi_info))
     }
 
     fun getAllPotentialHosts(): List<InetAddress> {
@@ -55,7 +56,7 @@ private fun getWifiInfo(context: Context): WifiInfo {
             return wifiInfo
         }
     }
-    throw UnknownHostException("Unable to get WiFi info")
+    throw UnknownHostException(context.getString(R.string.error_cannot_read_wifi_info))
 }
 
 private fun inetAddressFromInt(address: Int): InetAddress {

@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">Wake on LAN</string>
+    <string name="hostname">Hostname</string>
+    <string name="ip_address">IP Address</string>
     <string name="mac_address">MAC Address</string>
     <string name="example_mac_address">e.g. 00:00:00:00:00:00</string>
+    <string name="select_pc">Select PC</string>
     <string name="turn_on">Turn on</string>
-    <string name="computer_turned_on">Your computer has been turned on!</string>
+    <string name="pc_turned_on">Your PC has been turned on!</string>
     <string name="error">Error</string>
+    <string name="error_null_host">PC has not been selected yet</string>
+    <string name="error_cannot_read_wifi_info">Unable to read WiFi info</string>
+    <string name="error_cannot_read_arp_table">Failed to read arp table</string>
 </resources>
