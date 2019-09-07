@@ -41,7 +41,7 @@ class MainWidget : AppWidgetProvider() {
 
         if (intent.action == SEND_PACKET) {
             scope.launch {
-                val result = Result.runCatching {
+                val result = runCatching {
                     val host = Storage.getInstance(context).savedHost
                         ?: throw Exception(context.getString(R.string.error_null_host))
                     NetworkHandler(context).sendMagicPacket(host)

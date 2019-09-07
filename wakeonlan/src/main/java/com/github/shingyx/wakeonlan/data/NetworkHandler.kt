@@ -35,7 +35,12 @@ class NetworkHandler(private val context: Context) {
             val packetBytes = getMagicPacketBytes(macAddressBytes)
             val wifiAddresses = WifiAddresses(context)
             if (wifiAddresses.ssid != host.ssid) {
-                throw IOException(context.getString(R.string.error_incorrect_ssid))
+                val errorMessageId = if (wifiAddresses.ssid == "<unknown ssid>") {
+                    R.string.error_missing_location_permission
+                } else {
+                    R.string.error_incorrect_ssid
+                }
+                throw IOException(context.getString(errorMessageId))
             }
             val broadcastAddress = wifiAddresses.getBroadcastAddress()
             val packet = DatagramPacket(packetBytes, packetBytes.size, broadcastAddress, WOL_PORT)
@@ -53,6 +58,7 @@ class NetworkHandler(private val context: Context) {
         }
 
         val arpTable = try {
+            // TODO: This fails on Android Q - https://developer.android.com/about/versions/10/privacy/changes#proc-net-filesystem
             FileReader("/proc/net/arp").buffered().use { it.readText() }
         } catch (e: IOException) {
             throw IOException(context.getString(R.string.error_cannot_read_arp_table), e)

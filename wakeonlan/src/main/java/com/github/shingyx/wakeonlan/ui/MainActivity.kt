@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         model.host.observe(this, Observer(this::populateHostUi))
         model.hostScanResult.observe(this, Observer(this::handleHostScanResults))
-        model.turnOnResult.observe(this, Observer(this::handleTurnOnResult))
+        model.turnOnPcResult.observe(this, Observer(this::handleTurnOnResult))
 
         select_pc.setOnClickListener {
             if (checkPermissions()) {
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         turn_on.setOnClickListener {
             if (checkPermissions()) {
                 setUiEnabled(false)
-                scope.launch { model.turnOn() }
+                scope.launch { model.turnOnPc() }
             }
         }
     }

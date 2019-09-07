@@ -16,8 +16,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _host = MutableLiveData<Host?>()
     val host: LiveData<Host?> = _host
 
-    private val _turnOnResult = MutableLiveData<Result<Unit>>()
-    val turnOnResult: LiveData<Result<Unit>> = _turnOnResult
+    private val _turnOnPcResult = MutableLiveData<Result<Unit>>()
+    val turnOnPcResult: LiveData<Result<Unit>> = _turnOnPcResult
 
     private val _hostScanResult = MutableLiveData<Result<List<Host>>>()
     val hostScanResult: LiveData<Result<List<Host>>> = _hostScanResult
@@ -26,17 +26,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _host.value = storage.savedHost
     }
 
-    suspend fun turnOn() {
-        val result = Result.runCatching {
+    suspend fun turnOnPc() {
+        val result = runCatching {
             val host = storage.savedHost
                 ?: throw Exception(getApplication<Application>().getString(R.string.error_null_host))
             networkHandler.sendMagicPacket(host)
         }
-        _turnOnResult.value = result
+        _turnOnPcResult.value = result
     }
 
     suspend fun scanForHosts() {
-        val result = Result.runCatching {
+        val result = runCatching {
             networkHandler.scanForHosts()
         }
         _hostScanResult.value = result
