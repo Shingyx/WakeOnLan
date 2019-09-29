@@ -3,5 +3,8 @@
         <item name="colorPrimary">#1E88E5</item>
         <item name="colorSecondary">#1E88E5</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
+        <item name="android:navigationBarColor">#000</item>
     </style>
+
+    <style name="Transparent" parent="@style/Theme.AppCompat.Dialog" />
 </resources>
