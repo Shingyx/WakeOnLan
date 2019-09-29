@@ -14,8 +14,8 @@ before_script:
   # Suppress output to keep log under Travis limit
   - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "tools" > /dev/null
   - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "platform-tools" > /dev/null
-  - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "build-tools;28.0.3" > /dev/null
-  - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "platforms;android-28" > /dev/null
+  - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "build-tools;29.0.2" > /dev/null
+  - echo yes | ${ANDROID_HOME}tools/bin/sdkmanager "platforms;android-29" > /dev/null
 
 script: ./gradlew clean build
 
