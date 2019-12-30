@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions(): Boolean {
-        val permission = Manifest.permission.ACCESS_COARSE_LOCATION
+        val permission = Manifest.permission.ACCESS_FINE_LOCATION
         val checkResult = ContextCompat.checkSelfPermission(this, permission)
         if (checkResult == PackageManager.PERMISSION_GRANTED) {
             return true
