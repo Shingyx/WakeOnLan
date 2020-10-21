@@ -1,5 +1,7 @@
 # Wake on LAN
 
-[![Build Status](https://travis-ci.com/Shingyx/WakeOnLan.svg?branch=master)](https://travis-ci.com/Shingyx/WakeOnLan)
+<a href="https://github.com/Shingyx/WakeOnLan/actions?query=workflow%3A%22Android+CI%22+branch%3Amaster">
+    <img src="https://github.com/Shingyx/WakeOnLan/workflows/Android%20CI/badge.svg?branch=master">
+</a>
 
 Work in progress
