@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WakeOnLan.iml" filepath="$PROJECT_DIR$/WakeOnLan.iml" />
-      <module fileurl="file://$PROJECT_DIR$/wakeonlan/wakeonlan.iml" filepath="$PROJECT_DIR$/wakeonlan/wakeonlan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/WakeOnLan.iml" filepath="$PROJECT_DIR$/.idea/modules/WakeOnLan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.iml" filepath="$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.iml" />
     </modules>
   </component>
 </project>
