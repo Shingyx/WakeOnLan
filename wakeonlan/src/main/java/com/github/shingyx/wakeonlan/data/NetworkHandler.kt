@@ -59,16 +59,15 @@ class NetworkHandler(private val context: Context) {
             throw IOException(context.getString(R.string.error_cannot_read_arp_entries))
         }
 
-        fun parseHostFromLine(line: String): Host? {
+        fun tryParseHostFromLine(line: String): Host? {
             val values = line.split(Regex("\\s+"))
-            if (values.size > 4) {
-                val ipAddress = values[0]
+            if (values.size >= 5) {
+                val (ipAddress, _, _, _, macAddress) = values
                 val inetAddress = inetAddressMap[ipAddress]
                     ?: return null
 
                 val state = values.last()
                 if (state != "INCOMPLETE" && state != "FAILED") {
-                    val macAddress = values[4]
                     return Host(inetAddress.hostName, inetAddress.hostAddress, macAddress, ssid)
                 }
             }
@@ -77,7 +76,7 @@ class NetworkHandler(private val context: Context) {
 
         val hosts = ArrayList<Host>()
         ipProcess.inputStream.bufferedReader().forEachLine {
-            parseHostFromLine(it)?.let(hosts::add)
+            tryParseHostFromLine(it)?.let(hosts::add)
         }
         return hosts
     }
