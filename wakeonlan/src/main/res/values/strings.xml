@@ -4,7 +4,6 @@
     <string name="ip_address">IP Address</string>
     <string name="mac_address">MAC Address</string>
     <string name="ssid">WiFi SSID</string>
-    <string name="notify_when_connected_to_wifi">Notify when connected to WiFi</string>
     <string name="select_pc">Select PC</string>
     <string name="turn_on">Turn on</string>
     <string name="pc_turned_on">Your PC has been turned on!</string>
