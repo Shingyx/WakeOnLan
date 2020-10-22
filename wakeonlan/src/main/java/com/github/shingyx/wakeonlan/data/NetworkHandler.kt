@@ -5,9 +5,9 @@ import com.github.shingyx.wakeonlan.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import java.io.FileReader
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -21,12 +21,7 @@ private const val MAC_ADDRESS_BYTE_LENGTH = 6
 private const val WOL_PORT = 9
 private const val PING_TIMEOUT_MS = 200
 
-private val ip4Regex = Regex("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}") // Note: very loose match
 private val macRegex = Regex("(?:[0-9a-f]{2}:){5}[0-9a-f]{2}", RegexOption.IGNORE_CASE)
-private val arpTableIpMacRegex = Regex(
-    "^($ip4Regex).+($macRegex).*$",
-    setOf(RegexOption.IGNORE_CASE, RegexOption.MULTILINE)
-)
 
 class NetworkHandler(private val context: Context) {
     suspend fun sendMagicPacket(host: Host) {
@@ -57,23 +52,33 @@ class NetworkHandler(private val context: Context) {
             return emptyList()
         }
 
-        val arpTable = try {
-            // TODO: This fails on Android Q - https://developer.android.com/about/versions/10/privacy/changes#proc-net-filesystem
-            FileReader("/proc/net/arp").buffered().use { it.readText() }
-        } catch (e: IOException) {
-            throw IOException(context.getString(R.string.error_cannot_read_arp_table), e)
+        val ipProcess = withContext(Dispatchers.IO) {
+            Runtime.getRuntime().exec("ip neigh").also { it.waitFor() }
+        }
+        if (ipProcess.exitValue() != 0) {
+            throw IOException(context.getString(R.string.error_cannot_read_arp_entries))
+        }
+
+        fun parseHostFromLine(line: String): Host? {
+            val values = line.split(Regex("\\s+"))
+            if (values.size > 4) {
+                val ipAddress = values[0]
+                val inetAddress = inetAddressMap[ipAddress]
+                    ?: return null
+
+                val state = values.last()
+                if (state != "INCOMPLETE" && state != "FAILED") {
+                    val macAddress = values[4]
+                    return Host(inetAddress.hostName, inetAddress.hostAddress, macAddress, ssid)
+                }
+            }
+            return null
         }
 
         val hosts = ArrayList<Host>()
-
-        for (match in arpTableIpMacRegex.findAll(arpTable)) {
-            val (_, ipAddress, macAddress) = match.groupValues
-            val inetAddress = inetAddressMap[ipAddress]
-            if (inetAddress != null) {
-                hosts.add(Host(inetAddress.hostName, inetAddress.hostAddress, macAddress, ssid))
-            }
+        ipProcess.inputStream.bufferedReader().forEachLine {
+            parseHostFromLine(it)?.let(hosts::add)
         }
-
         return hosts
     }
 
@@ -81,11 +86,13 @@ class NetworkHandler(private val context: Context) {
         val reachableAddresses = ConcurrentLinkedQueue<InetAddress>()
         val allPotentialHosts = wifiAddresses.getAllPotentialHosts()
 
-        withContext(Dispatchers.IO) {
+        coroutineScope {
             allPotentialHosts.map {
                 async {
-                    if (isActive && it.isReachable(PING_TIMEOUT_MS) && it.hostName != null) {
-                        reachableAddresses.add(it)
+                    withContext(Dispatchers.IO) {
+                        if (isActive && it.isReachable(PING_TIMEOUT_MS) && it.hostName != null) {
+                            reachableAddresses.add(it)
+                        }
                     }
                 }
             }.awaitAll()

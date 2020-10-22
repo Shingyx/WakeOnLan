@@ -12,7 +12,7 @@
     <string name="error">Error</string>
     <string name="error_null_host">PC has not been selected yet.</string>
     <string name="error_cannot_read_wifi_info">Unable to read WiFi info. Is WiFi turned on?</string>
-    <string name="error_cannot_read_arp_table">Failed to read ARP table.</string>
+    <string name="error_cannot_read_arp_entries">Failed to read ARP entries.</string>
     <string name="error_missing_location_permission">Failed to read WiFi SSID due to missing location permissions.</string>
     <string name="error_incorrect_ssid">Device is connected to a different WiFi network.</string>
 </resources>
