@@ -1,18 +1,20 @@
 <resources>
     <string name="app_name">Wake on LAN</string>
-    <string name="hostname">Hostname</string>
-    <string name="ip_address">IP Address</string>
+    <string name="name">Name</string>
     <string name="mac_address">MAC Address</string>
     <string name="ssid">WiFi SSID</string>
-    <string name="select_pc">Select PC</string>
+    <string name="configure">Configure</string>
     <string name="turn_on">Turn on</string>
+    <string name="mac_address_with_hint">MAC Address (e.g. 12:34:56:78:90:ab)</string>
+    <string name="invalid_mac_address">Invalid MAC Address format</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
     <string name="pc_turned_on">Your PC has been turned on!</string>
     <string name="location_permission_title">Grant location permissions?</string>
     <string name="location_permission_rationale">Wake on LAN requires location permissions to access the SSID of your WiFi network. This is used to make sure your device is on the correct network before trying to turn your PC on.</string>
     <string name="error">Error</string>
     <string name="error_null_host">PC has not been selected yet.</string>
     <string name="error_cannot_read_wifi_info">Unable to read WiFi info. Is WiFi turned on?</string>
-    <string name="error_cannot_read_arp_entries">Failed to read ARP entries.</string>
     <string name="error_missing_location_permission">Failed to read WiFi SSID due to missing location permissions.</string>
     <string name="error_incorrect_ssid">Device is connected to a different WiFi network.</string>
 </resources>

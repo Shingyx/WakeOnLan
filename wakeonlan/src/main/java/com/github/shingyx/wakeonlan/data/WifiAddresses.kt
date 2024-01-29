@@ -32,24 +32,6 @@ class WifiAddresses(context: Context) {
             ?: throw UnknownHostException(context.getString(R.string.error_cannot_read_wifi_info))
     }
 
-    fun getAllPotentialHosts(): List<InetAddress> {
-        val networkPrefixLength = interfaceAddress.networkPrefixLength.toInt()
-        val subnetMask = (1 shl networkPrefixLength) - 1
-        val networkPrefix = deviceIpAddress and subnetMask
-
-        val suffixLength = 32 - networkPrefixLength
-        val hostCount = (1 shl suffixLength) - 1 // Minus 1 to exclude broadcast address
-
-        val results = ArrayList<InetAddress>(hostCount)
-        for (i in 0 until hostCount) {
-            val ipAddress = networkPrefix or (i shl networkPrefixLength)
-            if (ipAddress != deviceIpAddress) {
-                results.add(inetAddressFromInt(ipAddress))
-            }
-        }
-        return results
-    }
-
     fun getBroadcastAddress(): InetAddress {
         return interfaceAddress.broadcast
     }

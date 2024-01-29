@@ -1,24 +1,24 @@
 package com.github.shingyx.wakeonlan.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.TextView
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
+import com.github.shingyx.wakeonlan.data.WifiAddresses
+import com.github.shingyx.wakeonlan.data.isMacAddressValid
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     private val scope = MainScope()
@@ -32,13 +32,11 @@ class MainActivity : AppCompatActivity() {
         model = MainViewModel(application)
 
         model.host.observe(this, Observer(this::populateHostUi))
-        model.hostScanResult.observe(this, Observer(this::handleHostScanResults))
         model.turnOnPcResult.observe(this, Observer(this::handleTurnOnResult))
 
-        select_pc.setOnClickListener {
+        configure.setOnClickListener {
             if (checkPermissions()) {
-                setUiEnabled(false)
-                scope.launch { model.scanForHosts() }
+                configureHost()
             }
         }
 
@@ -56,8 +54,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateHostUi(host: Host?) {
-        hostname.text = host?.hostname ?: "-"
-        ip_address.text = host?.ipAddress ?: "-"
+        name.text = host?.name ?: "-"
         mac_address.text = host?.macAddress ?: "-"
         ssid.text = host?.ssid ?: "-"
     }
@@ -84,24 +81,44 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun handleHostScanResults(result: Result<List<Host>>) {
-        result.onSuccess { hosts ->
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.select_pc)
-                .setAdapter(HostListAdapter(this, hosts)) { _, index ->
-                    model.selectHost(hosts[index])
-                }
-                .show()
-        }
-        result.onFailure { exception ->
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.error)
-                .setMessage(exception.message)
-                .setPositiveButton(android.R.string.ok, null)
-                .show()
+    private fun configureHost() {
+        val ssid = try {
+            WifiAddresses(this).ssid
+        } catch (e: Exception) {
+            return showError(e.message)
         }
 
-        setUiEnabled(true)
+        val view = layoutInflater.inflate(R.layout.dialog_host, null)
+        val nameField = view.findViewById<EditText>(R.id.edit_name)
+        val macAddressField = view.findViewById<EditText>(R.id.edit_mac_address)
+        model.host.value?.let {
+            nameField.setText(it.name)
+            macAddressField.setText(it.macAddress)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.configure)
+            .setView(view)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save) { _, _ ->
+                val name = nameField.text.toString()
+                val macAddress = macAddressField.text.toString()
+                if (!isMacAddressValid(macAddress)) {
+                    // TODO don't hide the dialog after showing
+                    showError(getString(R.string.invalid_mac_address))
+                } else {
+                    val host = Host(name, macAddress, ssid)
+                    model.selectHost(host)
+                }
+            }
+            .show()
+    }
+
+    private fun showError(message: String?) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.error)
+            .setMessage(message)
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun handleTurnOnResult(result: Result<Unit>) {
@@ -116,36 +133,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUiEnabled(enable: Boolean) {
-        select_pc.isEnabled = enable
+        configure.isEnabled = enable
         turn_on.isEnabled = enable
         progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
-    }
-}
-
-private class HostListAdapter(
-    private val activity: Activity,
-    private val hosts: List<Host>
-) : BaseAdapter() {
-    override fun getItem(position: Int): Host {
-        return hosts[position]
-    }
-
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
-
-    override fun getCount(): Int {
-        return hosts.size
-    }
-
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val host = hosts[position]
-        val view = convertView
-            ?: activity.layoutInflater.inflate(R.layout.list_item_host, parent, false)
-        return view.apply {
-            findViewById<TextView>(R.id.hostname).text = host.hostname
-            findViewById<TextView>(R.id.ip_address).text = host.ipAddress
-            findViewById<TextView>(R.id.mac_address).text = host.macAddress
-        }
     }
 }

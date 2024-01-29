@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WakeOnLan.iml" filepath="$PROJECT_DIR$/.idea/modules/WakeOnLan.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.iml" filepath="$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.main.iml" filepath="$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/wakeonlan/WakeOnLan.wakeonlan.unitTest.iml" />
     </modules>
   </component>
 </project>

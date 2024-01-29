@@ -12,6 +12,7 @@ try {
 }
 
 android {
+    namespace 'com.github.shingyx.wakeonlan'
     signingConfigs {
         release {
             storeFile rootProject.file(keystoreProperties['storeFile'] ?: "default.jks")
@@ -20,11 +21,11 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 30
+    compileSdk 34
     defaultConfig {
         applicationId "com.github.shingyx.wakeonlan"
         minSdkVersion 24
-        targetSdkVersion 29
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
