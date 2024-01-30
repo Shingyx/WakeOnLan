@@ -32,7 +32,7 @@ class ShortcutActivity : AppCompatActivity() {
 
     private fun createShortcut() {
         val shortcutIntent = Intent(ACTION_SEND_PACKET, null, this, javaClass)
-        val iconResource = Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher_round)
+        val iconResource = Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher)
         @Suppress("DEPRECATION") // Currently, the deprecated approach has a more consistent style
         val intent = Intent().apply {
             putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent)
