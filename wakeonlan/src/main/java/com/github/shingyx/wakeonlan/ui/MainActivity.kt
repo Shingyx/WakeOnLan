@@ -1,6 +1,7 @@
 package com.github.shingyx.wakeonlan.ui
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -95,22 +96,23 @@ class MainActivity : AppCompatActivity() {
             nameField.setText(it.name)
             macAddressField.setText(it.macAddress)
         }
-        MaterialAlertDialogBuilder(this)
+        val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.configure)
             .setView(view)
             .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val name = nameField.text.toString()
-                val macAddress = macAddressField.text.toString()
-                if (!isMacAddressValid(macAddress)) {
-                    // TODO don't hide the dialog after showing
-                    showError(getString(R.string.invalid_mac_address))
-                } else {
-                    val host = Host(name, macAddress, ssid)
-                    model.selectHost(host)
-                }
-            }
+            .setPositiveButton(R.string.save, null)
             .show()
+        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            val name = nameField.text.toString()
+            val macAddress = macAddressField.text.toString()
+            if (!isMacAddressValid(macAddress)) {
+                showError(getString(R.string.invalid_mac_address))
+            } else {
+                val host = Host(name, macAddress, ssid)
+                model.selectHost(host)
+                dialog.dismiss()
+            }
+        }
     }
 
     private fun showError(message: String?) {
