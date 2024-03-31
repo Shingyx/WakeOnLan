@@ -26,7 +26,7 @@ class MacAddressTextWatcher : TextWatcher {
         var lastColonRequired = false
         for (char in text) {
             if (char.isLetterOrDigit()) {
-                if (builder.lastOrNull() != ':' && allowSeparator(digits)) {
+                if (allowSeparator(digits)) {
                     builder.append(':')
                     lastColonRequired = false
                 }
