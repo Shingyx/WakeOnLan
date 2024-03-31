@@ -23,18 +23,26 @@ class MacAddressTextWatcher : TextWatcher {
     private fun formatMacAddress(text: String): String {
         val builder = StringBuilder()
         var digits = 0
+        var insertTrailingColon = false
         for (char in text) {
             if (char.isLetterOrDigit()) {
-                if (digits % 2 == 0 && digits > 0 && digits < 12) {
+                if (allowSeparator(digits)) {
                     builder.append(':')
+                    insertTrailingColon = false
                 }
                 builder.append(char)
                 digits++
+            } else if (char == ':') {
+                insertTrailingColon = true
             }
         }
-        if (text.lastOrNull() == ':') {
+        if ((insertTrailingColon || text.lastOrNull() == ':') && allowSeparator(digits)) {
             builder.append(':')
         }
         return builder.toString()
+    }
+
+    private fun allowSeparator(digits: Int): Boolean {
+        return digits % 2 == 0 && digits in 1 until 12
     }
 }
