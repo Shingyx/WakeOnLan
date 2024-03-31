@@ -2,29 +2,22 @@ package com.github.shingyx.wakeonlan.ui
 
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.EditText
 
-class MacAddressTextWatcher(
-    private val editText: EditText
-) : TextWatcher {
+class MacAddressTextWatcher : TextWatcher {
     private var previousText: String = ""
 
-    override fun afterTextChanged(text: Editable) {}
-
-    override fun beforeTextChanged(text: CharSequence, start: Int, count: Int, after: Int) {
-        previousText = text.toString()
+    override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+        previousText = s.toString()
     }
 
-    override fun onTextChanged(text: CharSequence, start: Int, before: Int, count: Int) {
-        val previousCursorPosition = start + before
-        val previousTextAfterCursor = previousText.substring(previousCursorPosition)
-        val previousDigitsAfterCursor = getNumberOfDigits(previousTextAfterCursor)
+    override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 
-        val newText = formatMacAddress(text.toString())
-        editText.removeTextChangedListener(this)
-        editText.setText(newText)
-        editText.setSelection(getNewCursorPosition(previousDigitsAfterCursor, newText))
-        editText.addTextChangedListener(this)
+    override fun afterTextChanged(editable: Editable) {
+        val text = editable.toString()
+        val formattedText = formatMacAddress(text)
+        if (formattedText != text) {
+            editable.replace(0, editable.length, formattedText)
+        }
     }
 
     private fun formatMacAddress(text: String): String {
@@ -39,25 +32,9 @@ class MacAddressTextWatcher(
                 digits++
             }
         }
-        return builder.toString()
-    }
-
-    private fun getNumberOfDigits(text: String): Int {
-        return text.count(Char::isLetterOrDigit)
-    }
-
-    private fun getNewCursorPosition(previousDigitsAfterCursor: Int, newText: String): Int {
-        var charsAfterCursor = 0
-        var remainingDigits = previousDigitsAfterCursor
-        for (char in newText.reversed()) {
-            if (remainingDigits == 0) {
-                break
-            }
-            if (char.isLetterOrDigit()) {
-                remainingDigits--
-            }
-            charsAfterCursor++
+        if (text.lastOrNull() == ':') {
+            builder.append(':')
         }
-        return newText.length - charsAfterCursor
+        return builder.toString()
     }
 }

@@ -96,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_host, null)
         val nameField = view.findViewById<EditText>(R.id.edit_name)
         val macAddressField = view.findViewById<EditText>(R.id.edit_mac_address).apply {
-            addTextChangedListener(MacAddressTextWatcher(this))
+            addTextChangedListener(MacAddressTextWatcher())
         }
         model.host.value?.let {
             nameField.setText(it.name)
