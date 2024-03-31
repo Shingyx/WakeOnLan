@@ -15,11 +15,15 @@ import com.github.shingyx.wakeonlan.data.Host
 import com.github.shingyx.wakeonlan.data.WifiAddresses
 import com.github.shingyx.wakeonlan.data.isMacAddressValid
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.configure
+import kotlinx.android.synthetic.main.activity_main.mac_address
+import kotlinx.android.synthetic.main.activity_main.name
+import kotlinx.android.synthetic.main.activity_main.progress
+import kotlinx.android.synthetic.main.activity_main.ssid
+import kotlinx.android.synthetic.main.activity_main.turn_on
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     private val scope = MainScope()
@@ -91,7 +95,9 @@ class MainActivity : AppCompatActivity() {
 
         val view = layoutInflater.inflate(R.layout.dialog_host, null)
         val nameField = view.findViewById<EditText>(R.id.edit_name)
-        val macAddressField = view.findViewById<EditText>(R.id.edit_mac_address)
+        val macAddressField = view.findViewById<EditText>(R.id.edit_mac_address).apply {
+            addTextChangedListener(MacAddressTextWatcher())
+        }
         model.host.value?.let {
             nameField.setText(it.name)
             macAddressField.setText(it.macAddress)
