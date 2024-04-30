@@ -14,54 +14,50 @@ import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
 import com.github.shingyx.wakeonlan.data.WifiAddresses
 import com.github.shingyx.wakeonlan.data.isMacAddressValid
+import com.github.shingyx.wakeonlan.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.activity_main.configure
-import kotlinx.android.synthetic.main.activity_main.mac_address
-import kotlinx.android.synthetic.main.activity_main.name
-import kotlinx.android.synthetic.main.activity_main.progress
-import kotlinx.android.synthetic.main.activity_main.ssid
-import kotlinx.android.synthetic.main.activity_main.turn_on
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-    private val scope = MainScope()
-
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+    private lateinit var binding: ActivityMainBinding
     private lateinit var model: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         model = MainViewModel(application)
 
         model.host.observe(this, Observer(this::populateHostUi))
         model.turnOnPcResult.observe(this, Observer(this::handleTurnOnResult))
 
-        configure.setOnClickListener {
+        binding.configure.setOnClickListener {
             if (checkPermissions()) {
                 configureHost()
             }
         }
 
-        turn_on.setOnClickListener {
+        binding.turnOn.setOnClickListener {
             if (checkPermissions()) {
                 setUiEnabled(false)
-                scope.launch { model.turnOnPc() }
+                launch { model.turnOnPc() }
             }
         }
     }
 
     override fun onDestroy() {
-        scope.cancel()
+        cancel()
         super.onDestroy()
     }
 
     private fun populateHostUi(host: Host?) {
-        name.text = host?.name ?: "-"
-        mac_address.text = host?.macAddress ?: "-"
-        ssid.text = host?.ssid ?: "-"
+        binding.name.text = host?.name ?: "-"
+        binding.macAddress.text = host?.macAddress ?: "-"
+        binding.ssid.text = host?.ssid ?: "-"
     }
 
     private fun checkPermissions(): Boolean {
@@ -141,8 +137,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUiEnabled(enable: Boolean) {
-        configure.isEnabled = enable
-        turn_on.isEnabled = enable
-        progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
+        binding.configure.isEnabled = enable
+        binding.turnOn.isEnabled = enable
+        binding.progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
     }
 }
