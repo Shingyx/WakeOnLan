@@ -9,21 +9,21 @@ import androidx.appcompat.app.AppCompatActivity
 import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.NetworkHandler
 import com.github.shingyx.wakeonlan.data.Storage
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
 private const val ACTION_SEND_PACKET = "ACTION_SEND_PACKET"
 
-class ShortcutActivity : AppCompatActivity() {
+class ShortcutActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     private val tag = javaClass.simpleName
-    private val scope = MainScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         when (intent.action) {
             Intent.ACTION_CREATE_SHORTCUT -> createShortcut()
-            ACTION_SEND_PACKET -> scope.launch { sendPacket() }
+            ACTION_SEND_PACKET -> launch { sendPacket() }
             else -> Log.w(tag, "Unknown intent action ${intent.action}")
         }
 

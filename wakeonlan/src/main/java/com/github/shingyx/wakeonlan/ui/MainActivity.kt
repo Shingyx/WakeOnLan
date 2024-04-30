@@ -3,9 +3,11 @@ package com.github.shingyx.wakeonlan.ui
 import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -14,58 +16,76 @@ import com.github.shingyx.wakeonlan.R
 import com.github.shingyx.wakeonlan.data.Host
 import com.github.shingyx.wakeonlan.data.WifiAddresses
 import com.github.shingyx.wakeonlan.data.isMacAddressValid
+import com.github.shingyx.wakeonlan.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.android.synthetic.main.activity_main.configure
-import kotlinx.android.synthetic.main.activity_main.mac_address
-import kotlinx.android.synthetic.main.activity_main.name
-import kotlinx.android.synthetic.main.activity_main.progress
-import kotlinx.android.synthetic.main.activity_main.ssid
-import kotlinx.android.synthetic.main.activity_main.turn_on
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-    private val scope = MainScope()
-
+class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
+    private lateinit var binding: ActivityMainBinding
     private lateinit var model: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         model = MainViewModel(application)
 
         model.host.observe(this, Observer(this::populateHostUi))
         model.turnOnPcResult.observe(this, Observer(this::handleTurnOnResult))
 
-        configure.setOnClickListener {
-            if (checkPermissions()) {
+        binding.configure.setOnClickListener {
+            if (checkOrRequestLocationPermissions()) {
                 configureHost()
             }
         }
 
-        turn_on.setOnClickListener {
-            if (checkPermissions()) {
+        binding.turnOn.setOnClickListener {
+            if (checkOrRequestLocationPermissions()) {
                 setUiEnabled(false)
-                scope.launch { model.turnOnPc() }
+                launch { model.turnOnPc() }
             }
         }
+
+        checkOrRequestPostNotificationsPermission()
     }
 
     override fun onDestroy() {
-        scope.cancel()
+        cancel()
         super.onDestroy()
     }
 
     private fun populateHostUi(host: Host?) {
-        name.text = host?.name ?: "-"
-        mac_address.text = host?.macAddress ?: "-"
-        ssid.text = host?.ssid ?: "-"
+        binding.name.text = host?.name ?: "-"
+        binding.macAddress.text = host?.macAddress ?: "-"
+        binding.ssid.text = host?.ssid ?: "-"
     }
 
-    private fun checkPermissions(): Boolean {
-        val permission = Manifest.permission.ACCESS_FINE_LOCATION
+    private fun checkOrRequestLocationPermissions(): Boolean {
+        return checkOrRequestPermission(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            R.string.location_permission_title,
+            R.string.location_permission_rationale
+        )
+    }
+
+    private fun checkOrRequestPostNotificationsPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return true
+        }
+        return checkOrRequestPermission(
+            Manifest.permission.POST_NOTIFICATIONS,
+            R.string.notification_permission_title,
+            R.string.notification_permission_rationale
+        )
+    }
+
+    private fun checkOrRequestPermission(
+        permission: String, @StringRes titleResId: Int, @StringRes rationaleResId: Int
+    ): Boolean {
         val checkResult = ContextCompat.checkSelfPermission(this, permission)
         if (checkResult == PackageManager.PERMISSION_GRANTED) {
             return true
@@ -73,15 +93,15 @@ class MainActivity : AppCompatActivity() {
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.location_permission_title)
-                .setMessage(R.string.location_permission_rationale)
+                .setTitle(titleResId)
+                .setMessage(rationaleResId)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+                    ActivityCompat.requestPermissions(this, arrayOf(permission), titleResId)
                 }
                 .setCancelable(false)
                 .show()
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(permission), titleResId)
         }
         return false
     }
@@ -141,8 +161,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUiEnabled(enable: Boolean) {
-        configure.isEnabled = enable
-        turn_on.isEnabled = enable
-        progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
+        binding.configure.isEnabled = enable
+        binding.turnOn.isEnabled = enable
+        binding.progress.visibility = if (enable) View.INVISIBLE else View.VISIBLE
     }
 }
