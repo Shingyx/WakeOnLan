@@ -3,9 +3,11 @@ package com.github.shingyx.wakeonlan.ui
 import android.Manifest
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,17 +38,19 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         model.turnOnPcResult.observe(this, Observer(this::handleTurnOnResult))
 
         binding.configure.setOnClickListener {
-            if (checkPermissions()) {
+            if (checkOrRequestLocationPermissions()) {
                 configureHost()
             }
         }
 
         binding.turnOn.setOnClickListener {
-            if (checkPermissions()) {
+            if (checkOrRequestLocationPermissions()) {
                 setUiEnabled(false)
                 launch { model.turnOnPc() }
             }
         }
+
+        checkOrRequestPostNotificationsPermission()
     }
 
     override fun onDestroy() {
@@ -60,8 +64,28 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
         binding.ssid.text = host?.ssid ?: "-"
     }
 
-    private fun checkPermissions(): Boolean {
-        val permission = Manifest.permission.ACCESS_FINE_LOCATION
+    private fun checkOrRequestLocationPermissions(): Boolean {
+        return checkOrRequestPermission(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            R.string.location_permission_title,
+            R.string.location_permission_rationale
+        )
+    }
+
+    private fun checkOrRequestPostNotificationsPermission(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            return true
+        }
+        return checkOrRequestPermission(
+            Manifest.permission.POST_NOTIFICATIONS,
+            R.string.notification_permission_title,
+            R.string.notification_permission_rationale
+        )
+    }
+
+    private fun checkOrRequestPermission(
+        permission: String, @StringRes titleResId: Int, @StringRes rationaleResId: Int
+    ): Boolean {
         val checkResult = ContextCompat.checkSelfPermission(this, permission)
         if (checkResult == PackageManager.PERMISSION_GRANTED) {
             return true
@@ -69,15 +93,15 @@ class MainActivity : AppCompatActivity(), CoroutineScope by MainScope() {
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
             MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.location_permission_title)
-                .setMessage(R.string.location_permission_rationale)
+                .setTitle(titleResId)
+                .setMessage(rationaleResId)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
-                    ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+                    ActivityCompat.requestPermissions(this, arrayOf(permission), titleResId)
                 }
                 .setCancelable(false)
                 .show()
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(permission), 0)
+            ActivityCompat.requestPermissions(this, arrayOf(permission), titleResId)
         }
         return false
     }

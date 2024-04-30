@@ -12,6 +12,8 @@
     <string name="pc_turned_on">Your PC has been turned on!</string>
     <string name="location_permission_title">Grant location permissions?</string>
     <string name="location_permission_rationale">Wake on LAN requires location permissions to access the SSID of your WiFi network. This is used to make sure your device is on the correct network before trying to turn your PC on.</string>
+    <string name="notification_permission_title">Allow notifications?</string>
+    <string name="notification_permission_rationale">Without allowing notifications, the widget will operate silently without toast notifications.</string>
     <string name="error">Error</string>
     <string name="error_null_host">PC has not been selected yet.</string>
     <string name="error_cannot_read_wifi_info">Unable to read WiFi info. Is WiFi turned on?</string>
