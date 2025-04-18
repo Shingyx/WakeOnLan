@@ -3,6 +3,7 @@ package com.github.shingyx.wakeonlan.data
 import android.content.Context
 import com.github.shingyx.wakeonlan.R
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.DatagramPacket
@@ -17,6 +18,16 @@ private val macRegex = Regex("(?:[0-9a-f]{2}:){5}[0-9a-f]{2}", RegexOption.IGNOR
 
 class NetworkHandler(private val context: Context) {
     suspend fun sendMagicPacket(host: Host) {
+        try {
+            doSendMagicPacket(host)
+        } catch (e: IOException) {
+            // retry
+            delay(500)
+            doSendMagicPacket(host)
+        }
+    }
+
+    private suspend fun doSendMagicPacket(host: Host) {
         withContext(Dispatchers.IO) {
             val macAddressBytes = convertMacAddressString(host.macAddress)
             val packetBytes = getMagicPacketBytes(macAddressBytes)
